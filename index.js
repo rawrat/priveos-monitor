@@ -25,7 +25,7 @@ const wss = new WebSocket.Server({ noServer: true });
 server.on('upgrade', (request, socket, head) => {
   const pathname = url.parse(request.url).pathname
 
-  if (pathname === '/') {
+  if (pathname === '/live') {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit('connection', ws);
     });

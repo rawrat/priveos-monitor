@@ -11,7 +11,7 @@
         function connect() {
           var retry_interval = 3000;
           var timeout_ref;
-          var connection = new WebSocket('ws://127.0.0.1:9091')
+          var connection = new WebSocket('wss://monitor.priveos.io/live')
           
           
           connection.onopen = function() {
