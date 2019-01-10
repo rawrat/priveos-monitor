@@ -28,7 +28,7 @@
           connection.onmessage = function(e) {
             // console.log(e.data)
             var data = JSON.parse(e.data)
-            console.log(JSON.stringify(data, null, 2))  
+            // console.log(JSON.stringify(data, null, 2))  
             app.nodes = data 
             app.timeago = 0   
             last_update_at = new Date()      
