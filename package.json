@@ -1,0 +1,12 @@
+{
+  "name": "priveos-monitor",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0",
+    "eosjs": "16",
+    "underscore": "^1.9.1",
+    "ws": "^6.1.2"
+  }
+}

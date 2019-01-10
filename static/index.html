@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta name="viewport" content="width=device-width">
+      <meta name="viewport" content="initial-scale=1.0">
+      
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha256-zVUlvIh3NEZRYa9X/qpNY8P1aBy0d4FrI7bhfZSZVwc=" crossorigin="anonymous" />
+
+      <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+      <script>
+        function connect() {
+          var retry_interval = 3000;
+          var timeout_ref;
+          var connection = new WebSocket('ws://127.0.0.1:9091')
+          
+          
+          connection.onopen = function() {
+            console.log("onopen")
+          }
+          connection.onerror = function(error) {
+            console.log('WebSocket error: ' + error)
+            clearTimeout(timeout_ref)
+            timeout_ref = setTimeout(connect, retry_interval)
+          }
+          connection.onmessage = function(e) {
+            // console.log(e.data)
+            var data = JSON.parse(e.data)
+            console.log(JSON.stringify(data, null, 2))  
+            app.nodes = data          
+          }
+          connection.onclose = function() {
+            console.log("onclose")
+            clearTimeout(timeout_ref)
+            timeout_ref = setTimeout(connect, retry_interval)
+          }
+          
+        }
+        connect()
+
+        
+        var app
+        window.onload = function() {
+          app = new Vue({
+            el: '#app',
+            data: {
+              nodes: [],
+            },
+          })
+        }
+        
+        
+        
+        
+      </script>
+    </head>
+    
+    <body>
+      <div class="container">
+      <div id="app">  
+        <h1>PrivEOS Node Health</h1>
+
+        <div class="table-responsive">
+        <table class="table table-striped table-bordered table-condensed">
+          <thead>
+            <tr>
+              <td>Block Producer</td>
+              <td>URL</td>
+              <td>Status</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="node in nodes">
+              <td>{{ node[0].owner }}</td>
+              <td>{{ node[0].url }}</td>
+              <td>{{ node[1] }}</td>
+            </tr>          
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha256-IeI0loa35pfuDxqZbGhQUiZmD2Cywv1/bdqiypGW46o=" crossorigin="anonymous"></script>
+    </body>
+    
+</html>  
