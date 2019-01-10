@@ -8,8 +8,11 @@
 
       <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
       <script>
+        var app
+        var last_update_at
+        
         function connect() {
-          var retry_interval = 3000;
+          var retry_interval = 3000
           var timeout_ref;
           var connection = new WebSocket('wss://monitor.priveos.io/live')
           
@@ -26,7 +29,10 @@
             // console.log(e.data)
             var data = JSON.parse(e.data)
             console.log(JSON.stringify(data, null, 2))  
-            app.nodes = data          
+            app.nodes = data 
+            app.timeago = 0   
+            last_update_at = new Date()      
+            
           }
           connection.onclose = function() {
             console.log("onclose")
@@ -37,13 +43,17 @@
         }
         connect()
 
+        function update() {
+          app.timeago = Math.round(((new Date()) - last_update_at)/1000)
+        }
+        setInterval(update, 1000)
         
-        var app
         window.onload = function() {
           app = new Vue({
             el: '#app',
             data: {
               nodes: [],
+              timeago: last_update_at,
             },
           })
         }
@@ -58,7 +68,7 @@
       <div class="container">
       <div id="app">  
         <h1>PrivEOS Node Health</h1>
-
+        
         <div class="table-responsive">
         <table class="table table-striped table-bordered table-condensed">
           <thead>
@@ -77,6 +87,7 @@
           </tbody>
         </table>
         </div>
+        <span>Updated {{timeago}} seconds ago</span>
       </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
