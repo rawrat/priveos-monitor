@@ -5,6 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0",
+    "bluebird": "^3.5.3",
     "eosjs": "16",
     "underscore": "^1.9.1",
     "ws": "^6.1.2"
