@@ -6,6 +6,7 @@ const Eos = require('eosjs')
 const { URL } = require('url')
 const axios = require('axios')
 const _ = require('underscore')
+const sslChecker = require('ssl-checker')
 
 const seconds = 1000
 axios.defaults.timeout = 3 * seconds
@@ -45,23 +46,50 @@ async function node_check() {
   const nodes = await get_nodes()
   
   const promises = nodes.map(async node => {
-    const url = new URL('/broker/status/', node.url).href
+    const url = new URL('/broker/status/', node.url)
     try {
-      const res = await axios.get(url)
-      return res
+      return await check_node(url)
     } catch(e) {
+      // console.log(e)
       return {data : 'connection failed'}
     }
   })
   const responses = await Promise.all(promises)
-  const states = responses.map(x => x && x.data)
-  const node_states = _.zip(nodes, states)
+  const node_states = _.zip(nodes, responses)
   
   // console.log(node_states)
   latest_data = JSON.stringify(node_states, null, 2)
   broadcast(wss, latest_data)
 }
 
+async function check_node(url) {
+  let errors = []
+  let warnings = []
+  const [ssl_result, status_result] = await Promise.all([
+    sslChecker(url.host),
+    check_status(url),
+  ])
+  
+  
+  if(!ssl_result.valid) {
+    status_result.errors.push('SSL Certificate is invalid')
+  }
+  if(ssl_result.days_remaining < 10) {
+    add_warning(status_result, `SSL certificate expires in ${ssl_result.days_remaining} days. Please renew.`)
+  }
+  return status_result
+}
+function add_warning(status, warning) {
+  if(!status.warnings) {
+    status.warnings = []
+  }
+  status.warnings.push(warning)
+  
+}
+async function check_status(url) {
+  const res = await axios.get(url.href)
+  return res.data  
+}
 
 async function broadcast(socket, data) {
   socket.clients.forEach(client => {
@@ -76,5 +104,6 @@ async function get_nodes() {
   return res.rows.filter(x => x.is_active)
 }
 
+node_check()
 setInterval(node_check, 10 * seconds)
 
