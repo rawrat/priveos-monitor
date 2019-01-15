@@ -51,7 +51,7 @@ async function node_check() {
       return await check_node(url)
     } catch(e) {
       // console.log(e)
-      return {data : 'connection failed'}
+      return 'connection failed'
     }
   })
   const responses = await Promise.all(promises)
