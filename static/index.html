@@ -31,6 +31,8 @@
             var data = JSON.parse(e.data)
             // console.log(JSON.stringify(data, null, 2))  
             app.nodes = data 
+            app.node_count = data.length
+            app.healthy_node_count = data.filter(x => x[1].status == 'ok').length
             app.timeago = 0   
             last_update_at = new Date()      
             
