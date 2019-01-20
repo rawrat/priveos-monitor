@@ -80,6 +80,7 @@
             <tr>
               <td>Block Producer</td>
               <td>URL</td>
+              <td>Active</td>
               <td>Status</td>
             </tr>
           </thead>
@@ -87,6 +88,7 @@
             <tr v-for="node in nodes">
               <td>{{ node[0].owner }}</td>
               <td>{{ node[0].url }}</td>
+              <td>{{ node[0].is_active ? "Yes": "No" }}</td>
               <td>{{ node[1] }}</td>
             </tr>          
           </tbody>

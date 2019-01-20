@@ -101,7 +101,7 @@ async function broadcast(socket, data) {
 
 async function get_nodes() {
   const res = await eos.getTableRows({json:true, scope: config.contract, code: config.contract,  table: 'nodes', limit:100})
-  return res.rows.filter(x => x.is_active)
+  return res.rows
 }
 
 node_check()
