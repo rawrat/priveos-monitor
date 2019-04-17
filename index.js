@@ -11,13 +11,25 @@ const sslChecker = require('ssl-checker')
 const seconds = 1000
 axios.defaults.timeout = 3 * seconds
 
-const config = {
-  httpEndpoint: 'https://jungle2.cryptolions.io',
-  chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
-  contract: 'priveosrules',
+const chains = [
+  { 
+    name: 'Jungle Testnet',
+    httpEndpoint: 'https://jungle2.cryptolions.io',
+    chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
+    contract: 'priveosrules',
+  },
+  {
+    name: 'Telos Testnet',
+    httpEndpoint: 'https://testnet.telos.eossweden.eu',
+    chainId: 'e17615decaecd202a365f4c029f206eee98511979de8a5756317e2469f2289e3',
+    contract: 'priveosrules',    
+  }
+]
+
+for(let chain of chains) {
+  chain.eos = Eos({httpEndpoint: chain.httpEndpoint, chainId: chain.chainId})
 }
 
-const eos = Eos({httpEndpoint: config.httpEndpoint, chainId: config.chainId})
 const server = http.createServer()
 server.listen(9091, "127.0.0.1")
 
@@ -37,13 +49,25 @@ server.on('upgrade', (request, socket, head) => {
 
 wss.on('connection', (ws) => {
   if(latest_data) {
-    ws.send(latest_data)    
+    ws.send(JSON.stringify(latest_data))    
   }
 })
 
-let latest_data
+let latest_data = {}
+
 async function node_check() {
-  const nodes = await get_nodes()
+  const promises = chains.map(chain => node_check_chain(chain))
+  const results = await Promise.all(promises)
+  const chain_results = _.zip(chains, results)
+  for(const [chain, result] of chain_results) {
+    latest_data[chain.name] = result
+  }
+  // console.log(JSON.stringify(latest_data, null, 2))
+  broadcast(wss, JSON.stringify(latest_data))
+}
+
+async function node_check_chain(chain) {
+  const nodes = await get_nodes(chain)
   
   const promises = nodes.map(async node => {
     const url = new URL('/broker/status/', node.url)
@@ -56,10 +80,10 @@ async function node_check() {
   })
   const responses = await Promise.all(promises)
   const node_states = _.zip(nodes, responses)
-  
+  return node_states
   // console.log(node_states)
-  latest_data = JSON.stringify(node_states, null, 2)
-  broadcast(wss, latest_data)
+  // latest_data = JSON.stringify(node_states, null, 2)
+  // broadcast(wss, latest_data)
 }
 
 async function check_node(url) {
@@ -99,8 +123,8 @@ async function broadcast(socket, data) {
   })
 }
 
-async function get_nodes() {
-  const res = await eos.getTableRows({json:true, scope: config.contract, code: config.contract,  table: 'nodes', limit:100})
+async function get_nodes(chain) {
+  const res = await chain.eos.getTableRows({json:true, scope: chain.contract, code: chain.contract,  table: 'nodes', limit:100})
   return res.rows
 }
 
