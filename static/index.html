@@ -11,12 +11,14 @@
       <script>
         var app
         var last_update_at
-        
+        var connection
         function connect() {
           var retry_interval = 3000
           var timeout_ref;
-          var connection = new WebSocket('wss://monitor.priveos.io/live')
-          
+          if(connection) {
+            connection.close()
+          }
+          connection = new WebSocket('wss://monitor.priveos.io/live')          
           
           connection.onopen = function() {
             console.log("onopen")
