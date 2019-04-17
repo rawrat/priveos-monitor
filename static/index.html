@@ -12,10 +12,12 @@
         var app
         var last_update_at
         var connection
+        var should_close
         function connect() {
           var retry_interval = 3000
           var timeout_ref;
           if(connection) {
+            should_close = true
             connection.close()
           }
           connection = new WebSocket('wss://monitor.priveos.io/live')          
@@ -48,8 +50,11 @@
           }
           connection.onclose = function() {
             console.log("onclose")
-            clearTimeout(timeout_ref)
-            timeout_ref = setTimeout(connect, retry_interval)
+            if(!should_close) {
+              clearTimeout(timeout_ref)
+              timeout_ref = setTimeout(connect, retry_interval)
+            }
+            should_close = false
           }
           
         }
