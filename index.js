@@ -23,6 +23,12 @@ const chains = [
     httpEndpoint: 'https://testnet.telos.eossweden.eu',
     chainId: 'e17615decaecd202a365f4c029f206eee98511979de8a5756317e2469f2289e3',
     contract: 'priveosrules',    
+  },
+  {
+    name: 'Kylin Testnet',
+    httpEndpoint: 'https://api.kylin.alohaeos.com/',
+    chainId: '5fff1dae8dc8e2fc4d5b23b2c7665c97f9e9d8edf2b6485a86ba311c25639191',
+    contract: 'priveosrules',    
   }
 ]
 
