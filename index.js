@@ -92,20 +92,29 @@ async function node_check_chain(chain) {
   // broadcast(wss, latest_data)
 }
 
+async function trysslChecker(host) {
+  try {
+    return await sslChecker(host)
+  } catch(e) {
+    console.log("Error while sslChecker ", host)
+  }
+}
+
 async function check_node(url) {
   let errors = []
   let warnings = []
   const [ssl_result, status_result] = await Promise.all([
-    sslChecker(url.host),
+    trysslChecker(url.host),
     check_status(url),
   ])
   
-  
-  if(!ssl_result.valid) {
-    status_result.errors.push('SSL Certificate is invalid')
-  }
-  if(ssl_result.days_remaining < 10) {
-    add_warning(status_result, `SSL certificate expires in ${ssl_result.days_remaining} days. Please renew.`)
+  if(ssl_result) {
+    if(!ssl_result.valid) {
+      status_result.errors.push('SSL Certificate is invalid')
+    }
+    if(ssl_result.days_remaining < 10) {
+      add_warning(status_result, `SSL certificate expires in ${ssl_result.days_remaining} days. Please renew.`)
+    }
   }
   return status_result
 }
