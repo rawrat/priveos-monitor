@@ -73,20 +73,24 @@ async function node_check() {
 }
 
 async function node_check_chain(chain) {
-  const nodes = await get_nodes(chain)
+  try {
+    const nodes = await get_nodes(chain)
   
-  const promises = nodes.map(async node => {
-    const url = new URL('/broker/status/', node.url)
-    try {
-      return await check_node(url)
-    } catch(e) {
-      // console.log(e)
-      return 'connection failed'
-    }
-  })
-  const responses = await Promise.all(promises)
-  const node_states = _.zip(nodes, responses)
-  return node_states
+    const promises = nodes.map(async node => {
+      const url = new URL('/broker/status/', node.url)
+      try {
+        return await check_node(url)
+      } catch(e) {
+        // console.log(e)
+        return 'connection failed'
+      }
+    })
+    const responses = await Promise.all(promises)
+    const node_states = _.zip(nodes, responses)
+    return node_states
+  } catch(e) {
+    console.error("Error while get_nodes for chain ", chain.name)
+  }
   // console.log(node_states)
   // latest_data = JSON.stringify(node_states, null, 2)
   // broadcast(wss, latest_data)
