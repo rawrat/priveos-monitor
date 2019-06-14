@@ -20,7 +20,7 @@ const chains = [
   },
   {
     name: 'Telos Testnet',
-    httpEndpoint: 'http://testnet.telosusa.io/',
+    httpEndpoint: 'http://testnet.telosusa.io',
     chainId: 'e17615decaecd202a365f4c029f206eee98511979de8a5756317e2469f2289e3',
     contract: 'priveosrules',    
   },
